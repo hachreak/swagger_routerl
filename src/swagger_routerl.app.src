@@ -1,0 +1,15 @@
+{application, swagger_routerl,
+ [{description, "Routing library that generate the routing table from swagger.yaml."},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {applications,
+   [kernel,
+    stdlib
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
