@@ -1,0 +1,7 @@
+language: erlang
+otp_release:
+  - 18.0
+  - 18.1
+  - 18.2
+install: echo "fix travis for rebar3 compatibility"
+script: "./utils/rebar3 eunit"
