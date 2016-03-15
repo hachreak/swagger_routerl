@@ -17,7 +17,7 @@ start(_StartType, _StartArgs) ->
   swagger_routerl:init(),
   File = swagger_routerl:load("swagger.yaml"),
   RestCtx = myctx,
-  RoutingTable = swagger_routerl_cowboy_rest(File, RestCtx),
+  RoutingTable = swagger_routerl_cowboy_rest:routes(File, RestCtx),
   Dispatch = cowboy_router:compile([{'_', RoutingTable}]),
   {ok, _} = cowboy:start_http(http, 100, [{port, 8080}],
                               [{env, [{dispatch, Dispatch}]}]),

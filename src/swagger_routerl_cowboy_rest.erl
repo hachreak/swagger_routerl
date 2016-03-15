@@ -25,7 +25,7 @@
 
 -export_type([routectx/0]).
 
--type yaml() :: swagger_routerl:yaml().
+-type yaml()     :: swagger_routerl:yaml().
 -type routes()   :: cowboy_router:routes().
 -type routectx() :: term().
 
