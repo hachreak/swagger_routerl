@@ -16,9 +16,9 @@ This is an example how to load the routing table:
 ```erlang
 start(_StartType, _StartArgs) ->
   swagger_routerl:init(),
-  File = swagger_routerl:load("swagger.yaml"),
+  Yaml = swagger_routerl:load("swagger.yaml"),
   RestCtx = myctx,
-  RoutingTable = swagger_routerl_cowboy_rest:routes(File, RestCtx),
+  RoutingTable = swagger_routerl_cowboy_rest:routes(Yaml, RestCtx),
   Dispatch = cowboy_router:compile([{'_', RoutingTable}]),
   {ok, _} = cowboy:start_http(http, 100, [{port, 8080}],
                               [{env, [{dispatch, Dispatch}]}]),
@@ -28,13 +28,13 @@ start(_StartType, _StartArgs) ->
 Cowboy Websocket plugin
 -----------------------
 
-e.g. We have this routing table defined in our `swagger.yaml` file:
+E.g. We have this routing table defined in our `swagger.yaml` file:
 
  - `/users/{userid}` which return the information about the user identified by
    the `userid`.
 
-From a Websocket client, you'll send a `JSON` message to our
-`websocket server`, called `ws_handler`, which contains:
+From a websocket, clients can send a `JSON` message to our
+`websocket server` and own `ws_users_userid.erl` will handle and process it:
 
 ```json
 {
@@ -53,24 +53,19 @@ start(_StartType, _StartArgs) ->
   % init the module
   swagger_routerl:init(),
   % load the swagger file
-  File = swagger_routerl:load("swagger.yaml"),
-  % Context passed to the Websocket handler (in this example,
-  % `ws_users_userid.erl`)
+  Yaml = swagger_routerl:load("swagger.yaml"),
+  % Context passed to the Websocket handler (in this example the handler is
+  % only `ws_users_userid.erl`)
   RouteCtx = myctx,
   % compile the routing table
-  Routes = swagger_routerl_cowboy_compile:routes(File),
+  Routes = swagger_routerl_cowboy_ws:compile(Yaml),
   % build the application context for `swagger_routerl_cowboy_ws`
-  AppCtx = #{
-      % routing table compiles
-      routes => Routes,
-      % this context will be passed to `swagger_routerl_cowboy_ws`
-      routectx => RouteCtx
-  },
+  AppCtx = swagger_routerl_cowboy_ws:build_context(Routes, RouteCtx),
   % compile `cowboy` routing table
   Dispatch = cowboy_router:compile([
     {'_', [
-      % the websocket dispatcher
-      {"/websocket", ws_handler, [AppCtx]}
+      % the websocket dispatcher (you can choose the endpoint)
+      {"/websocket", swagger_routerl_cowboy_ws_dispatcher, [AppCtx]}
     ]}
   ])
   % start cowboy
@@ -79,32 +74,29 @@ start(_StartType, _StartArgs) ->
   myhttpserver:start_link().
 ```
 
-The `ws_handler.erl` file which dispatch the incoming requests:
-
-```erlang
-init(Req, AppCtx) ->
-  {cowboy_websocket, Req, AppCtx}.
-
-websocket_handle({text, EventTxt}, Req, AppCtx) ->
-  % decode event from a websocket client
-  Event = jsx:decode(EventTxt, [return_maps]),
-  % dispatch the request
-  swagger_routerl_cowboy_ws:execute(Event, Req, Appctx).
-```
-
-The handler for the path `/users/{userid}`, `ws_users_userid.erl`:
+After cowboy is correctly configured, we can implement the handler for the
+url `/users/{userid}`: `ws_users_userid.erl`
 
 ```erlang
 -module(ws_users_userid).
 
 -export([get/2]).
 
+-type appctx() :: swagger_routerl_cowboy_ws:appctx().
+
 % finally, handle the websocket request
-get(Event, Req, AppCtx) ->
+get(Event, Req, RouteCtx) ->
+  myctx = RouteCtx,
   ...
+  {ok, Req, RouteCtx}.
 ```
 
 Build
 -----
 
-    $ rebar3 compile
+    $ ./utils/rebar3 compile
+
+Test
+----
+
+    $ ./utils/rebar3 eunit
