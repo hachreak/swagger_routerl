@@ -48,7 +48,7 @@ routes(Yaml, RouteContext) ->
 
 %%% Private functions
 
--spec get_filename(list()) -> list().
+-spec get_filename(list()) -> atom().
 get_filename(PathConfig) ->
   Tokens = string:tokens(PathConfig, "/{}"),
   list_to_atom("resource_" ++ string:join(Tokens, "_")).
