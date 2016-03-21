@@ -19,7 +19,7 @@
 %%% @end
 -module(swagger_routerl).
 
--author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it').
+-author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
 %% API exports
 -export([init/0, load/1]).

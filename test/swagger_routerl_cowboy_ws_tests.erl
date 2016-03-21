@@ -19,7 +19,7 @@
 %%% @end
 -module(swagger_routerl_cowboy_ws_tests).
 
--author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it').
+-author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
 -include_lib("eunit/include/eunit.hrl").
 

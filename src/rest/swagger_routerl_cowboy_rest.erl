@@ -19,7 +19,7 @@
 %%% @end
 -module(swagger_routerl_cowboy_rest).
 
--author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it').
+-author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
 -export([routes/2]).
 
