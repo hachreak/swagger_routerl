@@ -30,7 +30,9 @@ swagger_routerl_cowboy_ws_test_() ->
     [
      fun build_regex/1,
      fun get_filename/1,
-     fun compile/1
+     fun compile/1,
+     fun build_context/1,
+     fun get_routectx/1
     ]
   }.
 
@@ -138,4 +140,19 @@ compile(_) ->
       meck:validate('ws_my-clients_clientid'),
       meck:unload('ws_my-clients_clientid')
     end
+  end.
+
+build_context(_) ->
+  fun() ->
+    ?assertEqual(
+      #{routes => fuu, routectx => bar},
+      swagger_routerl_cowboy_ws:build_context(fuu, bar))
+  end.
+
+get_routectx(_) ->
+  fun() ->
+    ?assertEqual(
+      bar,
+      swagger_routerl_cowboy_ws:get_routectx(
+        swagger_routerl_cowboy_ws:build_context(fuu, bar)))
   end.

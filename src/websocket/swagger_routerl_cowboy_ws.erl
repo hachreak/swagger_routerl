@@ -19,11 +19,11 @@
 %%% @end
 -module(swagger_routerl_cowboy_ws).
 
--author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it').
+-author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([compile/1, execute/3]).
+-export([compile/1, execute/3, build_context/2, get_routectx/1]).
 
--export_type([routectx/0]).
+-export_type([routectx/0, appctx/0, routes/0]).
 
 -type yaml()     :: swagger_routerl:yaml().
 -type routes()   :: list({re:mp(), handler()}).
@@ -69,6 +69,18 @@ execute(Event, Req, AppContext) ->
       end
   end.
 
+-spec build_context(routes(), routectx()) -> appctx().
+build_context(Routes, RouteCtx) ->
+  #{
+    % routing table compiles
+    routes => Routes,
+    % this context will be passed to `swagger_routerl_cowboy_ws`
+    routectx => RouteCtx
+  }.
+
+-spec get_routectx(appctx()) -> routectx().
+get_routectx(#{routectx := RouteCtx}) -> RouteCtx.
+
 %%% Private functions
 
 -spec to_atom(term()) -> atom().
@@ -100,7 +112,7 @@ build_regex(SwaggerPath) ->
   {ok, MP} = re:compile(RegEx),
   MP.
 
--spec get_filename(list()) -> list().
+-spec get_filename(list()) -> atom().
 get_filename(PathConfig) ->
   Tokens = string:tokens(PathConfig, "/{}"),
   list_to_atom("ws_" ++ string:join(Tokens, "_")).
