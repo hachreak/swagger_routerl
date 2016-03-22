@@ -87,7 +87,7 @@ url `/users/{userid}`: `ws_users_userid.erl`
 % finally, handle the websocket request
 get(Event, Req, Params, RouteCtx) ->
   myctx = RouteCtx,
-  ["userid"] = Params,
+  ["1"] = Params,
   ...
   {ok, Req, RouteCtx}.
 ```

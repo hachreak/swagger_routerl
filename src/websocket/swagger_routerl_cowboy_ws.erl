@@ -122,4 +122,5 @@ get_filename(PathConfig) ->
 
 -spec extract_params(url(), matches()) -> params().
 extract_params(Url, [_First | Matches]) ->
-  [string:substr(Url, Start + 1, Length) || {Start, Length} <- Matches].
+  [string:substr(
+     binary_to_list(Url), Start + 1, Length) || {Start, Length} <- Matches].

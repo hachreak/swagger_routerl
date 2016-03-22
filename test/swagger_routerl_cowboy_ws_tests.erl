@@ -46,21 +46,21 @@ build_regex(_) ->
         "/users/{userid}/email"),
     Handler = fuu,
     ?assertEqual({ok, {Handler, ["abc"]}}, swagger_routerl_cowboy_ws:match(
-      "/users/abc/email", [{MP, Handler}])),
+      <<"/users/abc/email">>, [{MP, Handler}])),
     ?assertEqual({ok, {Handler, ["abc-def"]}}, swagger_routerl_cowboy_ws:match(
-      "/users/abc-def/email", [{MP, Handler}])),
+      <<"/users/abc-def/email">>, [{MP, Handler}])),
     ?assertEqual(
       {ok, {Handler, ["abc-123-def"]}},
       swagger_routerl_cowboy_ws:match(
-        "/users/abc-123-def/email", [{MP, Handler}])),
+        <<"/users/abc-123-def/email">>, [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      "/users", [{MP, Handler}])),
+      <<"/users">>, [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      "/users/", [{MP, Handler}])),
+      <<"/users/">>, [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      "/users/abc/fuu", [{MP, Handler}])),
+      <<"/users/abc/fuu">>, [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      "/users/abc/email/fuu", [{MP, Handler}]))
+      <<"/users/abc/email/fuu">>, [{MP, Handler}]))
   end.
 
 get_filename(_) ->
@@ -86,15 +86,15 @@ compile(_) ->
     ],
     Routes = swagger_routerl_cowboy_ws:compile(File),
     Event1 = #{
-      <<"url">> => "/users/pippo/email",
+      <<"url">> => <<"/users/pippo/email">>,
       <<"method">> => <<"get">>
     },
     Event2 = #{
-      <<"url">> => "/users/pippo/email2",
+      <<"url">> => <<"/users/pippo/email2">>,
       <<"method">> => <<"get">>
     },
     Event3 = #{
-      <<"url">> => "/not-exists/pippo",
+      <<"url">> => <<"/not-exists/pippo">>,
       <<"method">> => <<"get">>
     },
     Appctx = #{
@@ -106,7 +106,7 @@ compile(_) ->
     meck:expect(ws_users_userid_email, get, 4,
                 fun(MyEvent, empty, ["pippo"], fuubar) ->
                     ?assertEqual(#{
-                       <<"url">> => "/users/pippo/email",
+                       <<"url">> => <<"/users/pippo/email">>,
                        <<"method">> => <<"get">>
                       }, MyEvent),
                     {return, MyEvent}
@@ -125,7 +125,7 @@ compile(_) ->
     end,
 
     Event4 = #{
-      <<"url">> => "/my-clients/pippo",
+      <<"url">> => <<"/my-clients/pippo">>,
       <<"method">> => <<"post">>
     },
     meck:new('ws_my-clients_clientid',
@@ -133,7 +133,7 @@ compile(_) ->
     meck:expect('ws_my-clients_clientid', post, 4,
                 fun(MyEvent, empty, ["pippo"], fuubar) ->
                     ?assertEqual(#{
-                       <<"url">> => "/my-clients/pippo",
+                       <<"url">> => <<"/my-clients/pippo">>,
                        <<"method">> => <<"post">>
                       }, MyEvent),
                     {return, MyEvent}
