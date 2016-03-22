@@ -104,7 +104,7 @@ build_regex(SwaggerPath) ->
   RegexList = lists:map(
     fun(El) ->
       case re:run(El, "^{.+}$") of
-        {match, _} -> "[\\w\-]+";
+        {match, _} -> "([\\w|-]+)";  % extended version: ([^/]+)
         _Rest -> El
       end
     end, List),

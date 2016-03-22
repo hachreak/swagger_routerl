@@ -47,6 +47,10 @@ build_regex(_) ->
     Handler = fuu,
     ?assertEqual({ok, Handler}, swagger_routerl_cowboy_ws:match(
       "/users/abc/email", [{MP, Handler}])),
+    ?assertEqual({ok, Handler}, swagger_routerl_cowboy_ws:match(
+      "/users/abc-def/email", [{MP, Handler}])),
+    ?assertEqual({ok, Handler}, swagger_routerl_cowboy_ws:match(
+      "/users/abc-123-def/email", [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
       "/users", [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
