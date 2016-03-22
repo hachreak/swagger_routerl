@@ -45,12 +45,14 @@ build_regex(_) ->
     MP = swagger_routerl_cowboy_ws:build_regex(
         "/users/{userid}/email"),
     Handler = fuu,
-    ?assertEqual({ok, Handler}, swagger_routerl_cowboy_ws:match(
+    ?assertEqual({ok, {Handler, ["abc"]}}, swagger_routerl_cowboy_ws:match(
       "/users/abc/email", [{MP, Handler}])),
-    ?assertEqual({ok, Handler}, swagger_routerl_cowboy_ws:match(
+    ?assertEqual({ok, {Handler, ["abc-def"]}}, swagger_routerl_cowboy_ws:match(
       "/users/abc-def/email", [{MP, Handler}])),
-    ?assertEqual({ok, Handler}, swagger_routerl_cowboy_ws:match(
-      "/users/abc-123-def/email", [{MP, Handler}])),
+    ?assertEqual(
+      {ok, {Handler, ["abc-123-def"]}},
+      swagger_routerl_cowboy_ws:match(
+        "/users/abc-123-def/email", [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
       "/users", [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
@@ -101,8 +103,8 @@ compile(_) ->
     },
     meck:new(ws_users_userid_email,
              [no_link, passthrough, no_history, non_strict]),
-    meck:expect(ws_users_userid_email, get, 3,
-                fun(MyEvent, empty, fuubar) ->
+    meck:expect(ws_users_userid_email, get, 4,
+                fun(MyEvent, empty, ["pippo"], fuubar) ->
                     ?assertEqual(#{
                        <<"url">> => "/users/pippo/email",
                        <<"method">> => <<"get">>
@@ -128,8 +130,8 @@ compile(_) ->
     },
     meck:new('ws_my-clients_clientid',
              [no_link, passthrough, no_history, non_strict]),
-    meck:expect('ws_my-clients_clientid', post, 3,
-                fun(MyEvent, empty, fuubar) ->
+    meck:expect('ws_my-clients_clientid', post, 4,
+                fun(MyEvent, empty, ["pippo"], fuubar) ->
                     ?assertEqual(#{
                        <<"url">> => "/my-clients/pippo",
                        <<"method">> => <<"post">>

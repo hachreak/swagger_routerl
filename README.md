@@ -85,8 +85,9 @@ url `/users/{userid}`: `ws_users_userid.erl`
 -type appctx() :: swagger_routerl_cowboy_ws:appctx().
 
 % finally, handle the websocket request
-get(Event, Req, RouteCtx) ->
+get(Event, Req, Params, RouteCtx) ->
   myctx = RouteCtx,
+  ["userid"] = Params,
   ...
   {ok, Req, RouteCtx}.
 ```

@@ -23,7 +23,7 @@
 
 -export([compile/1, execute/3, build_context/2, get_routectx/1]).
 
--export_type([routectx/0, appctx/0, routes/0]).
+-export_type([routectx/0, appctx/0, routes/0, params/0]).
 
 -type yaml()     :: swagger_routerl:yaml().
 -type routes()   :: list({re:mp(), handler()}).
@@ -33,6 +33,8 @@
 -type req()      :: cowboy_req:req().
 -type event()    :: map().
 -type url()      :: list().
+-type params()   :: list(list()).
+-type matches()  :: {integer(), integer()}.
 
 -ifdef(TEST).
 -compile(export_all).
@@ -60,10 +62,10 @@ execute(Event, Req, AppContext) ->
   RouteCtx = maps:get(routectx, AppContext),
   case match(maps:get(<<"url">>, Event), Routes) of
     {error, _}=Error -> Error;
-    {ok, Handler} ->
+    {ok, {Handler, Params}} ->
       Method = to_atom(maps:get(<<"method">>, Event)),
       try
-        Handler:Method(Event, Req, RouteCtx)
+        Handler:Method(Event, Req, Params, RouteCtx)
       catch
         error:undef -> {error, notdefined}
       end
@@ -89,12 +91,13 @@ to_atom(Binary) when is_binary(Binary) ->
   list_to_atom(binary_to_list(Binary)).
 
 
--spec match(url(), routes()) -> {ok, handler()} | {error, notfound}.
+-spec match(url(), routes()) ->
+  {ok, {handler(), params()}} | {error, notfound}.
 match(_Url, []) ->
   {error, notfound};
 match(Url, [{MP, Handler} | Rest]) ->
   case re:run(Url, MP) of
-    {match, _} -> {ok, Handler};
+    {match, Matches} -> {ok, {Handler, extract_params(Url, Matches)}};
     _Rest -> match(Url, Rest)
   end.
 
@@ -117,4 +120,6 @@ get_filename(PathConfig) ->
   Tokens = string:tokens(PathConfig, "/{}"),
   list_to_atom("ws_" ++ string:join(Tokens, "_")).
 
-
+-spec extract_params(url(), matches()) -> params().
+extract_params(Url, [_First | Matches]) ->
+  [string:substr(Url, Start + 1, Length) || {Start, Length} <- Matches].
