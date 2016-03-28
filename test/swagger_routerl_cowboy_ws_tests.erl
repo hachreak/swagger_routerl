@@ -32,7 +32,8 @@ swagger_routerl_cowboy_ws_test_() ->
      fun get_filename/1,
      fun compile/1,
      fun build_context/1,
-     fun get_routectx/1
+     fun get_routectx/1,
+     fun match/1
     ]
   }.
 
@@ -161,4 +162,13 @@ get_routectx(_) ->
       bar,
       swagger_routerl_cowboy_ws:get_routectx(
         swagger_routerl_cowboy_ws:build_context(fuu, bar)))
+  end.
+
+match(_) ->
+  fun() ->
+    Url = <<"/my-clients/pippo">>,
+    {ok, MP} = re:compile("my-clients/([\\w|-]+)"),
+    {ok, {myhandler, Params}} = swagger_routerl_cowboy_ws:match(
+                                  Url, [{MP, myhandler}]),
+    ?assertEqual(["pippo"], Params)
   end.
