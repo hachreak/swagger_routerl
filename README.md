@@ -6,7 +6,8 @@ Routing library that generate the routing table from `swagger.yaml`.
 Implemented plugins:
 
 - Cowboy REST routing table.
-- Cowboy Websocket routing table.
+- Cowboy Websocket routing table: dispatch events on top of a
+  websocket endpoint.
 
 Cowboy REST plugin
 ------------------
