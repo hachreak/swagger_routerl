@@ -35,8 +35,8 @@ swaggerpath2module(BaseName, PathConfig) ->
 % @doc Build the regex of a swagger path item.
 %
 % e.g.
-%    MP = swaggerpath_build_regex("/users/{userid}"),
-%    {match, _} = re:run("/users/hello", MP).
+%   MP = swaggerpath_build_regex("/users/{userid}"),
+%   {match, _} = re:run("/users/hello", MP).
 % @end
 -spec swaggerpath_build_regex(string()) -> re:mp().
 swaggerpath_build_regex(SwaggerPath) ->
@@ -57,9 +57,8 @@ swaggerpath_build_regex(SwaggerPath) ->
 % the compiled regex.
 %
 % e.g.
-%   re:compile(
-%     "^/GET/users/([\\w|-]+)$"
-%   ) = swaggerpath_build_regex("/users/{userid}", "/GET").
+%   MP = swaggerpath_build_regex("/users/{userid}", "/GET"),
+%   {match, _} = re:run("/GET/users/hello", MP).
 % @end
 -spec swaggerpath_build_regex(string(), string()) -> re:mp().
 swaggerpath_build_regex(SwaggerPath, Head) ->
