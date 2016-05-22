@@ -16,10 +16,15 @@ This is an example how to load the routing table:
 
 ```erlang
 start(_StartType, _StartArgs) ->
+  % init the module
   swagger_routerl:init(),
+  % load the swagger file
   Yaml = swagger_routerl:load("swagger.yaml"),
+  % Context passed to the handlers
   RestCtx = myctx,
+  % compile the routing table for cowboy
   RoutingTable = swagger_routerl_cowboy_rest:compile(Yaml, RestCtx),
+  % set the generated routing table
   Dispatch = cowboy_router:compile([{'_', RoutingTable}]),
   {ok, _} = cowboy:start_http(http, 100, [{port, 8080}],
                               [{env, [{dispatch, Dispatch}]}]),
