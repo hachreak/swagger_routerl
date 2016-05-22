@@ -105,10 +105,8 @@ compile(_) ->
       <<"url">> => <<"/not-exists/pippo">>,
       <<"method">> => <<"get">>
     },
-    Appctx = #{
-      routes => Routes,
-      routectx => fuubar
-    },
+    Appctx = swagger_routerl_cowboy_ws:build_context(Routes, fuubar),
+
     meck:new(ws_users_userid_email,
              [no_link, passthrough, no_history, non_strict]),
     meck:expect(ws_users_userid_email, get, 4,

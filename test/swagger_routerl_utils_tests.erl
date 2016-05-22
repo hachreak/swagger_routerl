@@ -51,11 +51,23 @@ swaggerpath2module(_) ->
 
 swaggerpath_build_regex(_) ->
   fun() ->
+      % string
       MP = swagger_routerl_utils:swaggerpath_build_regex("/users/{userid}"),
       {match, _} = re:run("/users/hello", MP),
-
-
       MP2 = swagger_routerl_utils:swaggerpath_build_regex(
               "/users/{userid}", "/GET"),
-      {match, _} = re:run("/GET/users/hello", MP2)
+      {match, _} = re:run("/GET/users/hello", MP2),
+      MP3 = swagger_routerl_utils:swaggerpath_build_regex(
+              "/users/{userid}", "GET"),
+      {match, _} = re:run("/GET/users/hello", MP3),
+
+      % binary string
+      MP = swagger_routerl_utils:swaggerpath_build_regex("/users/{userid}"),
+      {match, _} = re:run(<<"/users/hello">>, MP),
+      MP2 = swagger_routerl_utils:swaggerpath_build_regex(
+              "/users/{userid}", "/GET"),
+      {match, _} = re:run(<<"/GET/users/hello">>, MP2),
+      MP3 = swagger_routerl_utils:swaggerpath_build_regex(
+              "/users/{userid}", "GET"),
+      {match, _} = re:run(<<"/GET/users/hello">>, MP3)
   end.
