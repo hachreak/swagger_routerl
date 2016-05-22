@@ -61,7 +61,14 @@ build_regex(_) ->
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
       <<"/users/abc/fuu">>, [{MP, Handler}])),
     ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      <<"/users/abc/email/fuu">>, [{MP, Handler}]))
+      <<"/users/abc/email/fuu">>, [{MP, Handler}])),
+
+    % check "-"
+    MP2 = swagger_routerl_cowboy_ws:build_regex(
+        "/my-users/{userid}/email"),
+    Handler2 = bar,
+    ?assertEqual({ok, {Handler2, ["abc"]}}, swagger_routerl_cowboy_ws:match(
+      <<"/my-users/abc/email">>, [{MP2, Handler2}]))
   end.
 
 get_filename(_) ->
@@ -129,9 +136,9 @@ compile(_) ->
       <<"url">> => <<"/my-clients/pippo">>,
       <<"method">> => <<"post">>
     },
-    meck:new('ws_my-clients_clientid',
+    meck:new('ws_my_clients_clientid',
              [no_link, passthrough, no_history, non_strict]),
-    meck:expect('ws_my-clients_clientid', post, 4,
+    meck:expect('ws_my_clients_clientid', post, 4,
                 fun(MyEvent, empty, ["pippo"], fuubar) ->
                     ?assertEqual(#{
                        <<"url">> => <<"/my-clients/pippo">>,
@@ -144,8 +151,8 @@ compile(_) ->
       ?assertEqual({return, Event4},
                    swagger_routerl_cowboy_ws:execute(Event4, empty, Appctx))
     after
-      meck:validate('ws_my-clients_clientid'),
-      meck:unload('ws_my-clients_clientid')
+      meck:validate('ws_my_clients_clientid'),
+      meck:unload('ws_my_clients_clientid')
     end
   end.
 

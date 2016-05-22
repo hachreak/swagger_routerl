@@ -117,8 +117,7 @@ build_regex(SwaggerPath) ->
 
 -spec get_filename(list()) -> atom().
 get_filename(PathConfig) ->
-  Tokens = string:tokens(PathConfig, "/{}"),
-  list_to_atom("ws_" ++ string:join(Tokens, "_")).
+  swagger_routerl_utils:swaggerpath2module("ws_", PathConfig).
 
 -spec extract_params(url(), matches()) -> params().
 extract_params(Url, [_First | Matches]) ->
