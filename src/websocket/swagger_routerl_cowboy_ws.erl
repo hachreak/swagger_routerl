@@ -103,17 +103,7 @@ match(Url, [{MP, Handler} | Rest]) ->
 
 -spec build_regex(list()) -> re:mp().
 build_regex(SwaggerPath) ->
-  List = string:tokens(SwaggerPath, "/"),
-  RegexList = lists:map(
-    fun(El) ->
-      case re:run(El, "^{.+}$") of
-        {match, _} -> "([\\w|-]+)";  % extended version: ([^/]+)
-        _Rest -> El
-      end
-    end, List),
-  RegEx = "^/" ++ string:join(RegexList, "/") ++ "$",
-  {ok, MP} = re:compile(RegEx),
-  MP.
+  swagger_routerl_utils:swaggerpath_build_regex(SwaggerPath).
 
 -spec get_filename(list()) -> atom().
 get_filename(PathConfig) ->

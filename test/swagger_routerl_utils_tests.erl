@@ -28,7 +28,8 @@ all_test_() ->
     fun start/0,
     fun stop/1,
     [
-     fun swaggerpath2module/1
+     fun swaggerpath2module/1,
+     fun swaggerpath_build_regex/1
     ]
   }.
 
@@ -46,4 +47,15 @@ swaggerpath2module(_) ->
       ws_my_users_userid,
       swagger_routerl_utils:swaggerpath2module("ws_", "/my-users/{userid}")
     )
+  end.
+
+swaggerpath_build_regex(_) ->
+  fun() ->
+      MP = swagger_routerl_utils:swaggerpath_build_regex("/users/{userid}"),
+      {match, _} = re:run("/users/hello", MP),
+
+
+      MP2 = swagger_routerl_utils:swaggerpath_build_regex(
+              "/users/{userid}", "/GET"),
+      {match, _} = re:run("/GET/users/hello", MP2)
   end.
