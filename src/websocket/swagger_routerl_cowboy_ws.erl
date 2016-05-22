@@ -72,6 +72,11 @@ execute(Event, Req, AppContext) ->
       end
   end.
 
+-spec get_routectx(appctx()) -> routectx().
+get_routectx(#{routectx := RouteCtx}) -> RouteCtx.
+
+%%% Private functions
+
 -spec build_context(routes(), routectx()) -> appctx().
 build_context(Routes, RouteCtx) ->
   #{
@@ -80,11 +85,6 @@ build_context(Routes, RouteCtx) ->
     % this context will be passed to `swagger_routerl_cowboy_ws`
     routectx => RouteCtx
   }.
-
--spec get_routectx(appctx()) -> routectx().
-get_routectx(#{routectx := RouteCtx}) -> RouteCtx.
-
-%%% Private functions
 
 -spec to_atom(term()) -> atom().
 to_atom(Atom) when is_atom(Atom) -> Atom;
