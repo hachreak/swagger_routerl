@@ -50,8 +50,7 @@ compile(Yaml, RouteContext) ->
 
 -spec get_filename(list()) -> atom().
 get_filename(PathConfig) ->
-  Tokens = string:tokens(PathConfig, "/{}"),
-  list_to_atom("resource_" ++ string:join(Tokens, "_")).
+  swagger_routerl_utils:swaggerpath2module("resource_", PathConfig).
 
 -spec get_route(list(), list()) -> list().
 get_route(BasePath, SwaggerPath) ->
