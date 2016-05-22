@@ -19,7 +19,7 @@ start(_StartType, _StartArgs) ->
   swagger_routerl:init(),
   Yaml = swagger_routerl:load("swagger.yaml"),
   RestCtx = myctx,
-  RoutingTable = swagger_routerl_cowboy_rest:routes(Yaml, RestCtx),
+  RoutingTable = swagger_routerl_cowboy_rest:compile(Yaml, RestCtx),
   Dispatch = cowboy_router:compile([{'_', RoutingTable}]),
   {ok, _} = cowboy:start_http(http, 100, [{port, 8080}],
                               [{env, [{dispatch, Dispatch}]}]),
@@ -58,10 +58,9 @@ start(_StartType, _StartArgs) ->
   % Context passed to the Websocket handler (in this example the handler is
   % only `ws_users_userid.erl`)
   RouteCtx = myctx,
-  % compile the routing table
-  Routes = swagger_routerl_cowboy_ws:compile(Yaml),
-  % build the application context for `swagger_routerl_cowboy_ws`
-  AppCtx = swagger_routerl_cowboy_ws:build_context(Routes, RouteCtx),
+  % compile the routing table and
+  % retrieve the application context for `swagger_routerl_cowboy_ws`
+  AppCtx = swagger_routerl_cowboy_ws:compile(Yaml, RouteCtx),
   % compile `cowboy` routing table
   Dispatch = cowboy_router:compile([
     {'_', [

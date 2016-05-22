@@ -30,7 +30,7 @@ swagger_routerl_cowboy_rest_test_() ->
     [
      fun get_route/1,
      fun get_filename/1,
-     fun routes/1
+     fun compile/1
     ]
   }.
 
@@ -56,7 +56,7 @@ get_filename(_) ->
     )
   end.
 
-routes(_) ->
+compile(_) ->
   fun() ->
     File = [
       {"basePath", "/api/0.1.0"},
@@ -68,7 +68,7 @@ routes(_) ->
         {"/boxes/{boxid}", ok}
       ]}
     ],
-    Routes = swagger_routerl_cowboy_rest:routes(File, ctx),
+    Routes = swagger_routerl_cowboy_rest:compile(File, ctx),
     ?assertEqual([
       {"/api/0.1.0/users/[:userid]", resource_users_userid, ctx},
       {"/api/0.1.0/users/[:userid]/email", resource_users_userid_email, ctx},

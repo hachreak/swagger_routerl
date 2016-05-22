@@ -21,7 +21,7 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([compile/1, execute/3, build_context/2, get_routectx/1]).
+-export([compile/2, execute/3, get_routectx/1]).
 
 -export_type([routectx/0, appctx/0, routes/0, params/0]).
 
@@ -42,14 +42,15 @@
 
 %%% API functions
 
--spec compile(yaml()) -> routes().
-compile(Yaml) ->
+-spec compile(yaml(), routectx()) -> appctx().
+compile(Yaml, RouteCtx) ->
   Paths = proplists:get_value("paths", Yaml),
-  lists:map(
+  Routes = lists:map(
     fun({SwaggerPath, _Config}) ->
         {build_regex(SwaggerPath),
          get_filename(SwaggerPath)}
-    end, Paths).
+    end, Paths),
+  build_context(Routes, RouteCtx).
 
 -spec execute(event(), req(), appctx()) ->
     {ok, req(), routectx()}

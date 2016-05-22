@@ -21,7 +21,7 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([routes/2]).
+-export([compile/2]).
 
 -export_type([routectx/0]).
 
@@ -35,8 +35,8 @@
 
 %%% API functions
 
--spec routes(yaml(), routectx()) -> routes().
-routes(Yaml, RouteContext) ->
+-spec compile(yaml(), routectx()) -> routes().
+compile(Yaml, RouteContext) ->
   BasePath = proplists:get_value("basePath", Yaml, ""),
   Paths = proplists:get_value("paths", Yaml),
   lists:map(

@@ -92,7 +92,7 @@ compile(_) ->
         {"/not-exists/pippo", ok}
       ]}
     ],
-    Routes = swagger_routerl_cowboy_ws:compile(File),
+    Appctx = swagger_routerl_cowboy_ws:compile(File, fuubar),
     Event1 = #{
       <<"url">> => <<"/users/pippo/email">>,
       <<"method">> => <<"get">>
@@ -105,7 +105,6 @@ compile(_) ->
       <<"url">> => <<"/not-exists/pippo">>,
       <<"method">> => <<"get">>
     },
-    Appctx = swagger_routerl_cowboy_ws:build_context(Routes, fuubar),
 
     meck:new(ws_users_userid_email,
              [no_link, passthrough, no_history, non_strict]),
