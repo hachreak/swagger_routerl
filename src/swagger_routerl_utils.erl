@@ -21,7 +21,15 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([swaggerpath2module/2, swaggerpath_build_regex/1, swaggerpath_build_regex/2]).
+-export([swaggerpath2module/2, swaggerpath_build_regex/1,
+         swaggerpath_build_regex/2, extract_params/2, to_atom/1]).
+
+-export_type([params/0]).
+
+-type matches()  :: {integer(), integer()}.
+-type params()   :: list(list()).
+% TODO rename in path()
+-type path()     :: list().
 
 % @doc Convert a swagger path into a concrete erlang module name.
 %
@@ -63,3 +71,13 @@ swaggerpath_build_regex(SwaggerPath) ->
 -spec swaggerpath_build_regex(string(), string()) -> re:mp().
 swaggerpath_build_regex(SwaggerPath, Head) ->
   swaggerpath_build_regex(Head ++ SwaggerPath).
+
+-spec extract_params(path(), matches()) -> params().
+extract_params(Path, [_First | Matches]) ->
+  [string:substr(
+     binary_to_list(Path), Start + 1, Length) || {Start, Length} <- Matches].
+
+-spec to_atom(term()) -> atom().
+to_atom(Atom) when is_atom(Atom) -> Atom;
+to_atom(Binary) when is_binary(Binary) ->
+  list_to_atom(binary_to_list(Binary)).

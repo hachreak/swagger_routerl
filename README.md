@@ -44,7 +44,7 @@ From a websocket, clients can send a `JSON` message to our
 
 ```json
 {
-  "url": "/users/1",
+  "path": "/users/1",
   "method": "get"
 }
 ```
@@ -80,7 +80,7 @@ start(_StartType, _StartArgs) ->
 ```
 
 After cowboy is correctly configured, we can implement the handler for the
-url `/users/{userid}`: `ws_users_userid.erl`
+path `/users/{userid}`: `ws_users_userid.erl`
 
 ```erlang
 -module(ws_users_userid).

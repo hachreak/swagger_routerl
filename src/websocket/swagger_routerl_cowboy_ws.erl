@@ -32,9 +32,8 @@
 -type appctx()   :: #{routectx => routectx(), routes => routes()}.
 -type req()      :: cowboy_req:req().
 -type event()    :: map().
--type url()      :: list().
--type params()   :: list(list()).
--type matches()  :: {integer(), integer()}.
+-type params()   :: swagger_routerl_utils:params().
+-type path()      :: swagger_routerl_utils:path().
 
 -ifdef(TEST).
 -compile(export_all).
@@ -61,10 +60,10 @@ compile(Yaml, RouteCtx) ->
 execute(Event, Req, AppContext) ->
   Routes = maps:get(routes, AppContext),
   RouteCtx = maps:get(routectx, AppContext),
-  case match(maps:get(<<"url">>, Event), Routes) of
+  case match(maps:get(<<"path">>, Event), Routes) of
     {error, _}=Error -> Error;
     {ok, {Handler, Params}} ->
-      Method = to_atom(maps:get(<<"method">>, Event)),
+      Method = swagger_routerl_utils:to_atom(maps:get(<<"method">>, Event)),
       try
         Handler:Method(Event, Req, Params, RouteCtx)
       catch
@@ -86,20 +85,15 @@ build_context(Routes, RouteCtx) ->
     routectx => RouteCtx
   }.
 
--spec to_atom(term()) -> atom().
-to_atom(Atom) when is_atom(Atom) -> Atom;
-to_atom(Binary) when is_binary(Binary) ->
-  list_to_atom(binary_to_list(Binary)).
-
-
--spec match(url(), routes()) ->
+-spec match(path(), routes()) ->
   {ok, {handler(), params()}} | {error, notfound}.
-match(_Url, []) ->
+match(_Path, []) ->
   {error, notfound};
-match(Url, [{MP, Handler} | Rest]) ->
-  case re:run(Url, MP) of
-    {match, Matches} -> {ok, {Handler, extract_params(Url, Matches)}};
-    _Rest -> match(Url, Rest)
+match(Path, [{MP, Handler} | Rest]) ->
+  case re:run(Path, MP) of
+    {match, Matches} ->
+      {ok, {Handler, swagger_routerl_utils:extract_params(Path, Matches)}};
+    _Rest -> match(Path, Rest)
   end.
 
 -spec build_regex(list()) -> re:mp().
@@ -109,8 +103,3 @@ build_regex(SwaggerPath) ->
 -spec get_filename(list()) -> atom().
 get_filename(PathConfig) ->
   swagger_routerl_utils:swaggerpath2module("ws_", PathConfig).
-
--spec extract_params(url(), matches()) -> params().
-extract_params(Url, [_First | Matches]) ->
-  [string:substr(
-     binary_to_list(Url), Start + 1, Length) || {Start, Length} <- Matches].

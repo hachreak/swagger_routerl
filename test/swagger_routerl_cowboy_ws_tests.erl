@@ -94,15 +94,15 @@ compile(_) ->
     ],
     Appctx = swagger_routerl_cowboy_ws:compile(File, fuubar),
     Event1 = #{
-      <<"url">> => <<"/users/pippo/email">>,
+      <<"path">> => <<"/users/pippo/email">>,
       <<"method">> => <<"get">>
     },
     Event2 = #{
-      <<"url">> => <<"/users/pippo/email2">>,
+      <<"path">> => <<"/users/pippo/email2">>,
       <<"method">> => <<"get">>
     },
     Event3 = #{
-      <<"url">> => <<"/not-exists/pippo">>,
+      <<"path">> => <<"/not-exists/pippo">>,
       <<"method">> => <<"get">>
     },
 
@@ -111,7 +111,7 @@ compile(_) ->
     meck:expect(ws_users_userid_email, get, 4,
                 fun(MyEvent, empty, ["pippo"], fuubar) ->
                     ?assertEqual(#{
-                       <<"url">> => <<"/users/pippo/email">>,
+                       <<"path">> => <<"/users/pippo/email">>,
                        <<"method">> => <<"get">>
                       }, MyEvent),
                     {return, MyEvent}
@@ -130,7 +130,7 @@ compile(_) ->
     end,
 
     Event4 = #{
-      <<"url">> => <<"/my-clients/pippo">>,
+      <<"path">> => <<"/my-clients/pippo">>,
       <<"method">> => <<"post">>
     },
     meck:new('ws_my_clients_clientid',
@@ -138,7 +138,7 @@ compile(_) ->
     meck:expect('ws_my_clients_clientid', post, 4,
                 fun(MyEvent, empty, ["pippo"], fuubar) ->
                     ?assertEqual(#{
-                       <<"url">> => <<"/my-clients/pippo">>,
+                       <<"path">> => <<"/my-clients/pippo">>,
                        <<"method">> => <<"post">>
                       }, MyEvent),
                     {return, MyEvent}
