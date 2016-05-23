@@ -16,6 +16,10 @@
 %%% Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307, USA.
 %%%
 %%% @doc Transform the swagger file into a MQTT Application Layer.
+%%%
+%%% Through Swagger you can define endpoints connected to the topics.
+%%%
+%%% e.g. the topic /get/users/fuu will be equivalent to the REST GET /users/fuu
 %%% @end
 -module(swagger_routerl_emqtt).
 
