@@ -28,9 +28,9 @@ all_test_() ->
     fun start/0,
     fun stop/1,
     [
+     fun extract_method/1,
      fun get_filename/1,
      fun build_regex/1,
-     fun extract_method/1,
      fun compile/1
     ]
   }.
@@ -38,6 +38,19 @@ all_test_() ->
 start() -> ok.
 
 stop(_) -> ok.
+
+extract_method(_) ->
+  fun() ->
+      AppCtx = swagger_routerl_emqtt:build_context(routes, routectx),
+      ?assertEqual(
+         {ok, <<"get">>},
+         swagger_routerl_emqtt:extract_method(
+           <<"/get/users/pippo/email">>, AppCtx)),
+      ?assertEqual(
+         {error, wrong_topic},
+         swagger_routerl_emqtt:extract_method(
+           <<"get/users/pippo/email">>, AppCtx))
+  end.
 
 get_filename(_) ->
   fun() ->
@@ -63,15 +76,6 @@ build_regex(_) ->
     {match, _} = re:run("/delete/users/userid/email", MPDELETE)
   end.
 
-extract_method(_) ->
-  fun() ->
-    AppCtx = swagger_routerl_emqtt:build_context(routes, routectx),
-    ?assertEqual(
-       <<"get">>,
-       swagger_routerl_emqtt:extract_method(
-         <<"/get/users/pippo/email">>, AppCtx))
-  end.
-
 compile(_) ->
   fun() ->
     File = [
@@ -95,15 +99,15 @@ compile(_) ->
     meck:expect(emqtt_users_userid_email, get, 4,
                 fun(MyEvent, empty, ["pippo"], routectx) ->
                     ?assertEqual(<<"/get/users/pippo/email">>, MyEvent),
-                    {return, MyEvent}
+                    {reply, MyEvent}
                 end
                ),
     try
-      ?assertEqual({return, Event1},
+      ?assertEqual({reply, Event1},
                    swagger_routerl_emqtt:execute(Event1, empty, AppCtx)),
-      ?assertEqual({error, notfound},
+      ?assertEqual({error, not_found},
                    swagger_routerl_emqtt:execute(Event2, empty, AppCtx)),
-      ?assertEqual({error, notdefined},
+      ?assertEqual({error, not_defined},
                    swagger_routerl_emqtt:execute(Event3, empty, AppCtx))
     after
       meck:validate(emqtt_users_userid_email),
@@ -116,11 +120,11 @@ compile(_) ->
     meck:expect('emqtt_my_clients_clientid', post, 4,
                 fun(MyEvent, empty, ["pippo"], routectx) ->
                     ?assertEqual(<<"/post/my-clients/pippo">>, MyEvent),
-                    {return, MyEvent}
+                    {reply, MyEvent}
                 end
                ),
     try
-      ?assertEqual({return, Event4},
+      ?assertEqual({reply, Event4},
                    swagger_routerl_emqtt:execute(Event4, empty, AppCtx))
     after
       meck:validate('emqtt_my_clients_clientid'),

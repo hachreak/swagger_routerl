@@ -62,32 +62,44 @@ compile(Yaml, RouteCtx) ->
   build_context(Routes, RouteCtx).
 
 % TODO extend to bi-directionality stream.
--spec execute(topic(), payload(), appctx()) -> ok | error.
+-spec execute(topic(), payload(), appctx()) ->
+  {reply, payload()} | noreply |
+  {error, not_found | not_defined | wrong_topic}.
 execute(Topic, Payload, #{routes := Routes, routectx := RouteCtx}=AppCtx) ->
+  % match topic
   case match(Topic, Routes) of
     {error, _}=Error -> Error;
     {ok, {Handler, Params}} ->
-      Method = swagger_routerl_utils:to_atom(extract_method(Topic, AppCtx)),
-      try
-        Handler:Method(Topic, Payload, Params, RouteCtx)
-      catch
-        error:undef -> {error, notdefined}
+      % extract method
+      case extract_method(Topic, AppCtx) of
+        {error, _}=Error -> Error;
+        {ok, StringMethod} ->
+          Method = swagger_routerl_utils:to_atom(StringMethod),
+          try
+            % execute endpoint
+            Handler:Method(Topic, Payload, Params, RouteCtx)
+          catch
+            error:undef -> {error, not_defined}
+          end
       end
-  end.
+  end;
+execute(_Topic, _Payload, _AppCtx) -> {error, wrong_topic}.
 
 %% Private functions
 
--spec extract_method(topic(), appctx()) -> method().
+-spec extract_method(topic(), appctx()) ->
+  {ok, method()} | {error, wrong_topic}.
 extract_method(Topic, #{extract_method := MP}) ->
   case re:run(Topic, MP) of
-    nomatch -> throw(wrong_message);
-    {match, [_, {Init, End}, _Rest]} -> binary:part(Topic, Init, End)
+    nomatch -> {error, wrong_topic};
+    {match, [_, {Init, End}, _Rest]} -> {ok, binary:part(Topic, Init, End)}
   end.
 
+
 -spec match(topic(), routes()) ->
-  {ok, {handler(), params()}} | {error, notfound}.
+  {ok, {handler(), params()}} | {error, not_found}.
 match(_Topic, []) ->
-  {error, notfound};
+  {error, not_found};
 match(Topic, [{MP, Handler} | Rest]) ->
   case re:run(Topic, MP) of
     {match, Matches} ->
