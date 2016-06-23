@@ -22,7 +22,7 @@
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
 %% API exports
--export([init/0, load/1]).
+-export([init/0, load/1, get_version/1]).
 
 -export_type([appctx/0, filename/0, yaml/0]).
 
@@ -42,6 +42,11 @@ init() ->
 load(Filename) ->
   [File] = yamerl:decode_file(Filename),
   File.
+
+-spec get_version(yaml()) -> binary().
+get_version(Yaml) ->
+  Info = proplists:get_value("info", Yaml, []),
+  proplists:get_value("version", Info, "0.1.0").
 
 %%====================================================================
 %% Internal functions
