@@ -50,7 +50,7 @@ get_route(_) ->
 get_filename(_) ->
   fun() ->
     Path = swagger_routerl_cowboy_rest:get_filename(
-        "/users/{userid}/email"),
+        "resource_", "/users/{userid}/email"),
     ?assertEqual(
       resource_users_userid_email, Path
     )
@@ -68,7 +68,7 @@ compile(_) ->
         {"/boxes/{boxid}", ok}
       ]}
     ],
-    Routes = swagger_routerl_cowboy_rest:compile(File, ctx),
+    Routes = swagger_routerl_cowboy_rest:compile("resource_", File, ctx),
     ?assertEqual([
       {"/api/0.1.0/users/[:userid]", resource_users_userid, ctx},
       {"/api/0.1.0/users/[:userid]/email", resource_users_userid_email, ctx},

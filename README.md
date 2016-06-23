@@ -23,7 +23,8 @@ start(_StartType, _StartArgs) ->
   % Context passed to the handlers
   RestCtx = myctx,
   % compile the routing table for cowboy
-  RoutingTable = swagger_routerl_cowboy_rest:compile(Yaml, RestCtx),
+  RoutingTable = swagger_routerl_cowboy_rest:compile(
+      "resource_", Yaml, RestCtx),
   % set the generated routing table
   Dispatch = cowboy_router:compile([{'_', RoutingTable}]),
   {ok, _} = cowboy:start_http(http, 100, [{port, 8080}],

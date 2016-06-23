@@ -21,7 +21,7 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([compile/2]).
+-export([compile/3]).
 
 -export_type([routectx/0]).
 
@@ -35,24 +35,24 @@
 
 %%% API functions
 
--spec compile(yaml(), routectx()) -> routes().
-compile(Yaml, RouteContext) ->
+-spec compile(string(), yaml(), routectx()) -> routes().
+compile(Prefix, Yaml, RouteContext) ->
   BasePath = proplists:get_value("basePath", Yaml, ""),
   Paths = proplists:get_value("paths", Yaml),
   lists:map(
     fun({SwaggerPath, _Config}) ->
         {get_route(BasePath, SwaggerPath),
-         get_filename(SwaggerPath),
+         get_filename(Prefix, SwaggerPath),
          RouteContext}
     end, Paths).
 
 %%% Private functions
 
--spec get_filename(list()) -> atom().
-get_filename(PathConfig) ->
-  swagger_routerl_utils:swaggerpath2module("resource_", PathConfig).
+-spec get_filename(string(), string()) -> atom().
+get_filename(Prefix, PathConfig) ->
+  swagger_routerl_utils:swaggerpath2module(Prefix, PathConfig).
 
--spec get_route(list(), list()) -> list().
+-spec get_route(string(), string()) -> string().
 get_route(BasePath, SwaggerPath) ->
   Opts = [{return,list}, global],
   Path1 = re:replace(SwaggerPath, "{", "[:", Opts),
