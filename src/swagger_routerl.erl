@@ -22,7 +22,7 @@
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
 %% API exports
--export([init/0, load/1, get_version/1]).
+-export([load/1, get_version/1]).
 
 -export_type([appctx/0, filename/0, yaml/0]).
 
@@ -33,10 +33,6 @@
 %%====================================================================
 %% API functions
 %%====================================================================
-
--spec init() -> appctx().
-init() ->
-  application:start(yamerl).
 
 -spec load(filename()) -> yaml().
 load(Filename) ->

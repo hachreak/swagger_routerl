@@ -17,7 +17,7 @@ This is an example how to load the routing table:
 ```erlang
 start(_StartType, _StartArgs) ->
   % init the module
-  swagger_routerl:init(),
+  application:ensure_all_started(swagger_routerl).
   % load the swagger file
   Yaml = swagger_routerl:load("swagger.yaml"),
   % Context passed to the handlers
@@ -58,7 +58,7 @@ This is an example how to load the routing table, in the application
 ```erlang
 start(_StartType, _StartArgs) ->
   % init the module
-  swagger_routerl:init(),
+  application:ensure_all_started(swagger_routerl).
   % load the swagger file
   Yaml = swagger_routerl:load("swagger.yaml"),
   % Context passed to the Websocket handler (in this example the handler is
