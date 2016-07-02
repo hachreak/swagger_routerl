@@ -27,7 +27,7 @@
 -export_type([appctx/0, filename/0, yaml/0]).
 
 -type appctx()   :: ok.
--type filename() :: binary().
+-type filename() :: binary() | string().
 -type yaml()     :: list({string(), term()}).
 
 %%====================================================================
@@ -39,7 +39,7 @@ load(Filename) ->
   [File] = yamerl:decode_file(Filename),
   File.
 
--spec get_version(yaml()) -> binary().
+-spec get_version(yaml()) -> string().
 get_version(Yaml) ->
   Info = proplists:get_value("info", Yaml, []),
   proplists:get_value("version", Info, "0.1.0").
