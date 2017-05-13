@@ -21,15 +21,24 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([swaggerpath2module/2, swaggerpath_build_regex/1,
-         swaggerpath_build_regex/2, extract_params/2, to_atom/1]).
+-export([
+  extract_params/2,
+  render/2,
+  swaggerpath2module/2,
+  swaggerpath_build_regex/1,
+  swaggerpath_build_regex/2,
+  to_atom/1,
+  to_binary/1
+]).
 
 -export_type([params/0]).
 
+-type key()      :: binary().
 -type matches()  :: {integer(), integer()}.
+-type pairs()    :: list({key(), value()}).
 -type params()   :: list(list()).
-% TODO rename in path()
 -type path()     :: list().
+-type value()    :: binary().
 
 % @doc Convert a swagger path into a concrete erlang module name.
 %
@@ -77,7 +86,20 @@ extract_params(Path, [_First | Matches]) ->
   [string:substr(
      binary_to_list(Path), Start + 1, Length) || {Start, Length} <- Matches].
 
--spec to_atom(term()) -> atom().
-to_atom(Atom) when is_atom(Atom) -> Atom;
-to_atom(Binary) when is_binary(Binary) ->
-  list_to_atom(binary_to_list(Binary)).
+-spec to_atom(binary() | list() | binary()) -> atom().
+to_atom(Atom)   when is_atom(Atom)     -> Atom;
+to_atom(List)   when is_list(List)     -> list_to_atom(List);
+to_atom(Binary) when is_binary(Binary) -> to_atom(binary_to_list(Binary)).
+
+-spec to_binary(binary() | list() | atom()) -> binary().
+to_binary(Binary) when is_binary(Binary) -> Binary;
+to_binary(List)   when is_list(List)     -> list_to_binary(List);
+to_binary(Atom)   when is_atom(Atom)     -> to_binary(atom_to_list(Atom)).
+
+-spec render(binary(), pairs()) -> binary().
+render(Template, SubPair) ->
+  lists:foldl(
+    fun({K, V}, Acc) ->
+        Pattern = << <<"{{">>/binary, K/binary, <<"}}">>/binary >>,
+        re:replace(Acc, Pattern, V, [{return, binary}, global])
+    end, Template, SubPair).

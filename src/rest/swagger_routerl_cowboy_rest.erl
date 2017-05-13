@@ -21,13 +21,17 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([compile/3]).
+-export([
+  compile/3,
+  file_endpoint/2
+]).
 
 -export_type([routectx/0]).
 
--type yaml()     :: swagger_routerl:yaml().
--type routes()   :: cowboy_router:routes().
 -type routectx() :: term().
+-type routes()   :: cowboy_router:routes().
+-type swagger_endpoint_ctx() :: #{protocol := _, endpoint := _, handler := _}.
+-type yaml()     :: swagger_routerl:yaml().
 
 -ifdef(TEST).
 -compile(export_all).
@@ -46,6 +50,14 @@ compile(Prefix, Yaml, RouteContext) ->
          RouteContext}
     end, Paths).
 
+-spec file_endpoint(binary(), swagger_endpoint_ctx()) -> routes().
+file_endpoint(SwaggerFileRaw, Ctx) ->
+  Protocol = maps:get(protocol, Ctx, <<"http">>),
+  Endpoint = maps:get(endpoint, Ctx, "/docs/swagger.yaml"),
+  Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_rest_docs_handler),
+  SwaggerFile = set_scheme(SwaggerFileRaw, Protocol),
+  [{Endpoint, Handler, #{swagger_file => SwaggerFile}}].
+
 %%% Private functions
 
 -spec get_filename(string(), string()) -> atom().
@@ -58,3 +70,8 @@ get_route(BasePath, SwaggerPath) ->
   Path1 = re:replace(SwaggerPath, "{", "[:", Opts),
   CowboyPath = re:replace(Path1, "}", "]", Opts),
   BasePath ++ CowboyPath.
+
+-spec set_scheme(binary(), binary()) -> binary().
+set_scheme(SwaggerFileRaw, Protocol) ->
+  swagger_routerl_utils:render(
+    SwaggerFileRaw, [{<<"scheme_protocol">>, Protocol}]).

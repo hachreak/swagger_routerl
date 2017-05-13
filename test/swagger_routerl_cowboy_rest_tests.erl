@@ -77,3 +77,77 @@ compile(_) ->
       {"/api/0.1.0/boxes/[:boxid]", resource_boxes_boxid, ctx}
     ], Routes)
   end.
+
+file_endpoint_test() ->
+  Swagger = <<"
+      ---
+      swagger: '2.0'
+      info:
+        version: 1.0.0
+        title: Simple API
+      schemes:
+        - {{scheme_protocol}}
+      paths:
+        /:
+          get:
+            responses:
+              200:
+                description: OK
+    ">>,
+  Expected_http = <<"
+      ---
+      swagger: '2.0'
+      info:
+        version: 1.0.0
+        title: Simple API
+      schemes:
+        - http
+      paths:
+        /:
+          get:
+            responses:
+              200:
+                description: OK
+    ">>,
+  Expected_https = <<"
+      ---
+      swagger: '2.0'
+      info:
+        version: 1.0.0
+        title: Simple API
+      schemes:
+        - https
+      paths:
+        /:
+          get:
+            responses:
+              200:
+                description: OK
+    ">>,
+
+  ?assertEqual([{
+      "/docs/swagger.yaml",
+      swagger_routerl_cowboy_rest_docs_handler,
+      #{swagger_file => Expected_http}
+    }], swagger_routerl_cowboy_rest:file_endpoint(Swagger, #{})),
+  ?assertEqual([{
+      "/docs/swagger.yaml",
+      swagger_routerl_cowboy_rest_docs_handler,
+      #{swagger_file => Expected_https}
+    }], swagger_routerl_cowboy_rest:file_endpoint(Swagger, #{
+      protocol => <<"https">>
+    })),
+  ?assertEqual([{
+      "/docs/swagger.yaml",
+      myhandler,
+      #{swagger_file => Expected_https}
+    }], swagger_routerl_cowboy_rest:file_endpoint(Swagger, #{
+      protocol => <<"https">>, handler => myhandler
+    })),
+  ?assertEqual([{
+      "/myendpoint/swagger.yaml",
+      swagger_routerl_cowboy_rest_docs_handler,
+      #{swagger_file => Expected_http}
+    }], swagger_routerl_cowboy_rest:file_endpoint(Swagger, #{
+      protocol => <<"http">>, endpoint => "/myendpoint/swagger.yaml"
+    })).

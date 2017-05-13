@@ -71,3 +71,20 @@ swaggerpath_build_regex(_) ->
               "/users/{userid}", "GET"),
       {match, _} = re:run(<<"/GET/users/hello">>, MP3)
   end.
+
+to_binary_test() ->
+  ?assertEqual(<<"hello">>, swagger_routerl_utils:to_binary(<<"hello">>)),
+  ?assertEqual(<<"hello">>, swagger_routerl_utils:to_binary("hello")),
+  ?assertEqual(<<"hello">>, swagger_routerl_utils:to_binary(hello)).
+
+to_atom_test() ->
+  ?assertEqual(hello, swagger_routerl_utils:to_atom(<<"hello">>)),
+  ?assertEqual(hello, swagger_routerl_utils:to_atom("hello")),
+  ?assertEqual(hello, swagger_routerl_utils:to_atom(hello)).
+
+render_test() ->
+  ?assertEqual(
+     <<"hello worlds! See you worlds..">>,
+     swagger_routerl_utils:render(
+       <<"hello {{subject}}! See you {{subject}}..">>,
+       [{<<"subject">>, <<"worlds">>}])).
