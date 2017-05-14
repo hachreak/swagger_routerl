@@ -35,8 +35,7 @@
 init({tcp, http}, _Req, _AppCtx) ->
   {upgrade, protocol, cowboy_websocket}.
 
-websocket_init(_TransportName, Req, AppCtx) ->
-  {ok, Req, swagger_routerl_cowboy_ws:get_routectx(AppCtx)}.
+websocket_init(_TransportName, Req, AppCtx) -> {ok, Req, AppCtx}.
 
 websocket_handle({ping, _Ping}, Req, RouteCtx) ->
   {ok, Req, RouteCtx};
