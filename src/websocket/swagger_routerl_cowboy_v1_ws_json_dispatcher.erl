@@ -17,23 +17,41 @@
 %%%
 %%% @doc Websocket dispatcher
 %%% @end
--module(swagger_routerl_cowboy_ws_dispatcher).
+-module(swagger_routerl_cowboy_v1_ws_json_dispatcher).
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([init/2, websocket_handle/3, websocket_info/3]).
+-export([
+  init/3,
+  websocket_handle/3,
+  websocket_info/3,
+  websocket_init/3
+]).
 
 
 %%% API functions
 
-init(Req, AppCtx) ->
-  {cowboy_websocket, Req, swagger_routerl_cowboy_ws:get_routectx(AppCtx)}.
+init({tcp, http}, _Req, _AppCtx) ->
+  {upgrade, protocol, cowboy_websocket}.
+
+websocket_init(_TransportName, Req, AppCtx) ->
+  {ok, Req, swagger_routerl_cowboy_ws:get_routectx(AppCtx)}.
 
 websocket_handle({ping, _Ping}, Req, RouteCtx) ->
   {ok, Req, RouteCtx};
-websocket_handle({text, Event}, Req, RouteCtx) ->
+websocket_handle({text, EventTxt}, Req, RouteCtx) ->
+  % decode event from a websocket client
+  Event = jsx:decode(EventTxt, [return_maps]),
   % dispatch the request
-  swagger_routerl_cowboy_ws:dispatch(Event, Req, RouteCtx).
+  output(swagger_routerl_cowboy_ws:dispatch(Event, Req, RouteCtx)).
 
 websocket_info(_Info, Req, RouteCtx) ->
   {ok, Req, RouteCtx}.
+
+%% Private functions
+
+output({reply, Msg, Req, RouteCtx}) ->
+  {reply, {text, jsx:encode(#{result => ok, context => Msg})}, Req, RouteCtx};
+output({shutdown, Req, RouteCtx}) ->
+  {shutdown, jsx:encode(#{result => error, context => Req}), RouteCtx};
+output(Rest) -> Rest.

@@ -48,7 +48,7 @@
 
 compile(Prefix, Yaml, RouteCtx, Ctx) ->
   Endpoint = maps:get(endpoint, Ctx, "/websocket"),
-  Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_ws_dispatcher),
+  Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_v1_ws_dispatcher),
   AppCtx = dispatch_rules(Prefix, Yaml, RouteCtx),
   [{Endpoint, Handler, AppCtx}].
 
