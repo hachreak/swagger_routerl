@@ -22,9 +22,9 @@
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
 -export([
-  compile/3,
+  compile/4,
   dispatch/3,
-  dispatch_rules/2,
+  dispatch_rules/3,
   get_routectx/1
 ]).
 
@@ -46,19 +46,19 @@
 
 %%% API functions
 
-compile(Yaml, RouteCtx, Ctx) ->
+compile(Prefix, Yaml, RouteCtx, Ctx) ->
   Endpoint = maps:get(endpoint, Ctx, "/websocket"),
   Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_ws_dispatcher),
-  AppCtx = dispatch_rules(Yaml, RouteCtx),
+  AppCtx = dispatch_rules(Prefix, Yaml, RouteCtx),
   [{Endpoint, Handler, AppCtx}].
 
--spec dispatch_rules(yaml(), routectx()) -> appctx().
-dispatch_rules(Yaml, RouteCtx) ->
+-spec dispatch_rules(list(), yaml(), routectx()) -> appctx().
+dispatch_rules(Prefix, Yaml, RouteCtx) ->
   Paths = proplists:get_value("paths", Yaml),
   Routes = lists:map(
     fun({SwaggerPath, _Config}) ->
         {build_regex(SwaggerPath),
-         get_filename(SwaggerPath)}
+         get_filename(Prefix, SwaggerPath)}
     end, Paths),
   build_context(Routes, RouteCtx).
 
@@ -111,6 +111,6 @@ match(Path, [{MP, Handler} | Rest]) ->
 build_regex(SwaggerPath) ->
   swagger_routerl_utils:swaggerpath_build_regex(SwaggerPath).
 
--spec get_filename(list()) -> atom().
-get_filename(PathConfig) ->
-  swagger_routerl_utils:swaggerpath2module("ws_", PathConfig).
+-spec get_filename(list(), list()) -> atom().
+get_filename(Prefix, PathConfig) ->
+  swagger_routerl_utils:swaggerpath2module(Prefix, PathConfig).
