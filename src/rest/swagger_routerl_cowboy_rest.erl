@@ -54,7 +54,7 @@ compile(Prefix, Yaml, RouteContext) ->
 file_endpoint(SwaggerFileRaw, Ctx) ->
   Protocol = maps:get(protocol, Ctx, <<"http">>),
   Endpoint = maps:get(endpoint, Ctx, "/docs/swagger.yaml"),
-  Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_rest_docs_handler),
+  Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_v1_file_handler),
   SwaggerFile = set_scheme(SwaggerFileRaw, Protocol),
   [{Endpoint, Handler, #{swagger_file => SwaggerFile}}].
 
