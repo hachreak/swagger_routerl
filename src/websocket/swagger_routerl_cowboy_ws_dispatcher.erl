@@ -35,7 +35,7 @@ websocket_handle({text, EventTxt}, Req, RouteCtx) ->
   % decode event from a websocket client
   Event = jsx:decode(EventTxt, [return_maps]),
   % dispatch the request
-  swagger_routerl_cowboy_ws:execute(Event, Req, RouteCtx).
+  swagger_routerl_cowboy_ws:dispatch(Event, Req, RouteCtx).
 
 websocket_info(_Info, Req, RouteCtx) ->
   {ok, Req, RouteCtx}.

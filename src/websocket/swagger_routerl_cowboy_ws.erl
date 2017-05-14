@@ -21,7 +21,12 @@
 
 -author('Leonardo Rossi <leonardo.rossi@studenti.unipr.it>').
 
--export([compile/2, execute/3, get_routectx/1]).
+-export([
+  compile/3,
+  dispatch/3,
+  dispatch_rules/2,
+  get_routectx/1
+]).
 
 -export_type([routectx/0, appctx/0, routes/0, params/0]).
 
@@ -41,8 +46,14 @@
 
 %%% API functions
 
--spec compile(yaml(), routectx()) -> appctx().
-compile(Yaml, RouteCtx) ->
+compile(Yaml, RouteCtx, Ctx) ->
+  Endpoint = maps:get(endpoint, Ctx, "/websocket"),
+  Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_ws_dispatcher),
+  AppCtx = dispatch_rules(Yaml, RouteCtx),
+  [{Endpoint, Handler, AppCtx}].
+
+-spec dispatch_rules(yaml(), routectx()) -> appctx().
+dispatch_rules(Yaml, RouteCtx) ->
   Paths = proplists:get_value("paths", Yaml),
   Routes = lists:map(
     fun({SwaggerPath, _Config}) ->
@@ -51,13 +62,13 @@ compile(Yaml, RouteCtx) ->
     end, Paths),
   build_context(Routes, RouteCtx).
 
--spec execute(event(), req(), appctx()) ->
+-spec dispatch(event(), req(), appctx()) ->
     {ok, req(), routectx()}
   | {ok, req(), routectx(), hibernate}
   | {reply, cow_ws:frame() | [cow_ws:frame()], req(), routectx()}
   | {reply, cow_ws:frame() | [cow_ws:frame()], req(), routectx(), hibernate}
   | {stop, req(), routectx()}.
-execute(Event, Req, AppContext) ->
+dispatch(Event, Req, AppContext) ->
   Routes = maps:get(routes, AppContext),
   RouteCtx = maps:get(routectx, AppContext),
   case match(maps:get(<<"path">>, Event), Routes) of

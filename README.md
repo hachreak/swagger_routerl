@@ -66,14 +66,11 @@ start(_StartType, _StartArgs) ->
   RouteCtx = myctx,
   % compile the routing table and
   % retrieve the application context for `swagger_routerl_cowboy_ws`
-  AppCtx = swagger_routerl_cowboy_ws:compile(Yaml, RouteCtx),
+  Routes = swagger_routerl_cowboy_ws:compile(Yaml, RouteCtx, #{
+    endpoit => "/websocket"
+  }),
   % compile `cowboy` routing table
-  Dispatch = cowboy_router:compile([
-    {'_', [
-      % the websocket dispatcher (you can choose the endpoint)
-      {"/websocket", swagger_routerl_cowboy_ws_dispatcher, [AppCtx]}
-    ]}
-  ])
+  Dispatch = cowboy_router:compile([{'_', Routes}]),
   % start cowboy
   {ok, _} = cowboy:start_http(http, 100, [{port, 8080}],
                               [{env, [{dispatch, Dispatch}]}]),
