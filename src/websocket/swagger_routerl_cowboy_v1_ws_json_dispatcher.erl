@@ -25,7 +25,8 @@
   init/3,
   websocket_handle/3,
   websocket_info/3,
-  websocket_init/3
+  websocket_init/3,
+  websocket_terminate/3
 ]).
 
 
@@ -45,8 +46,9 @@ websocket_handle({text, EventTxt}, Req, RouteCtx) ->
   % dispatch the request
   output(swagger_routerl_cowboy_ws:dispatch(Event, Req, RouteCtx)).
 
-websocket_info(_Info, Req, RouteCtx) ->
-  {ok, Req, RouteCtx}.
+websocket_info(_Info, Req, RouteCtx) -> {ok, Req, RouteCtx}.
+
+websocket_terminate(_Reason, _Req, _State) -> ok.
 
 %% Private functions
 
