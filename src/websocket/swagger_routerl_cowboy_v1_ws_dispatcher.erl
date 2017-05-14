@@ -39,7 +39,9 @@ websocket_init(_TransportName, Req, AppCtx) -> {ok, Req, AppCtx}.
 
 websocket_handle({ping, _Ping}, Req, RouteCtx) ->
   {ok, Req, RouteCtx};
-websocket_handle({text, Event}, Req, RouteCtx) ->
+websocket_handle({text, EventTxt}, Req, RouteCtx) ->
+  % decode event from a websocket client
+  Event = jsx:decode(EventTxt, [return_maps]),
   % dispatch the request
   swagger_routerl_cowboy_ws:dispatch(Event, Req, RouteCtx).
 
