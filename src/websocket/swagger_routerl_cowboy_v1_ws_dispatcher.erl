@@ -37,14 +37,22 @@ init({tcp, http}, _Req, _AppCtx) ->
 
 websocket_init(_TransportName, Req, AppCtx) -> {ok, Req, AppCtx}.
 
-websocket_handle({ping, _Ping}, Req, RouteCtx) ->
-  {ok, Req, RouteCtx};
-websocket_handle({text, EventTxt}, Req, RouteCtx) ->
+websocket_handle({ping, _Ping}, Req, AppCtx) ->
+  {ok, Req, AppCtx};
+websocket_handle({text, EventTxt}, Req, AppCtx) ->
   % decode event from a websocket client
   Event = jsx:decode(EventTxt, [return_maps]),
   % dispatch the request
-  swagger_routerl_cowboy_ws:dispatch(Event, Req, RouteCtx).
+  output(swagger_routerl_cowboy_ws:dispatch(Event, Req, AppCtx), AppCtx).
 
-websocket_info(_Info, Req, RouteCtx) -> {ok, Req, RouteCtx}.
+websocket_info(_Info, Req, AppCtx) -> {ok, Req, AppCtx}.
 
 websocket_terminate(_Reason, _Req, _State) -> ok.
+
+%% Private functions
+
+output({reply, Msg, Req}, AppCtx) ->
+  {reply, {text, Msg}, Req, AppCtx};
+output({shutdown, Error}, AppCtx) ->
+  {shutdown, Error, AppCtx};
+output({ok, Rest}, AppCtx) -> {ok, Rest, AppCtx}.
