@@ -63,11 +63,11 @@ dispatch_rules(Prefix, Yaml, RouteCtx) ->
   build_context(Routes, RouteCtx).
 
 -spec dispatch(event(), req(), appctx()) ->
-    {ok, req(), routectx()}
-  | {ok, req(), routectx(), hibernate}
-  | {reply, cow_ws:frame() | [cow_ws:frame()], req(), routectx()}
-  | {reply, cow_ws:frame() | [cow_ws:frame()], req(), routectx(), hibernate}
-  | {stop, req(), routectx()}.
+    {ok, req(), appctx()}
+  | {ok, req(), appctx(), hibernate}
+  | {reply, cow_ws:frame() | [cow_ws:frame()], req(), appctx()}
+  | {reply, cow_ws:frame() | [cow_ws:frame()], req(), appctx(), hibernate}
+  | {stop, req(), appctx()}.
 dispatch(Event, Req, AppContext) ->
   Routes = maps:get(routes, AppContext),
   RouteCtx = maps:get(routectx, AppContext),
@@ -78,7 +78,7 @@ dispatch(Event, Req, AppContext) ->
       try
         Handler:Method(Event, Req, Params, RouteCtx)
       catch
-        error:undef -> {error, notdefined}
+        error:undef -> {stop, Req, AppContext}
       end
   end.
 
