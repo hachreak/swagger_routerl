@@ -23,14 +23,11 @@
 
 -export([
   compile/4,
-  dispatch/3,
-  dispatch_rules/3,
-  get_routectx/1
+  dispatch/3
 ]).
 
 -export_type([routectx/0, appctx/0, routes/0, params/0]).
 
--type yaml()     :: swagger_routerl:yaml().
 -type routes()   :: list({re:mp(), handler()}).
 -type handler()  :: atom().
 -type routectx() :: term().
@@ -38,29 +35,14 @@
 -type req()      :: cowboy_req:req().
 -type event()    :: map().
 -type params()   :: swagger_routerl_utils:params().
--type path()      :: swagger_routerl_utils:path().
-
--ifdef(TEST).
--compile(export_all).
--endif.
 
 %%% API functions
 
 compile(Prefix, Yaml, RouteCtx, Ctx) ->
   Endpoint = maps:get(endpoint, Ctx, "/websocket"),
   Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_v1_ws_dispatcher),
-  AppCtx = dispatch_rules(Prefix, Yaml, RouteCtx),
+  AppCtx = swagger_routerl_router:compile(Prefix, Yaml, RouteCtx),
   [{Endpoint, Handler, AppCtx}].
-
--spec dispatch_rules(list(), yaml(), routectx()) -> appctx().
-dispatch_rules(Prefix, Yaml, RouteCtx) ->
-  Paths = proplists:get_value("paths", Yaml),
-  Routes = lists:map(
-    fun({SwaggerPath, _Config}) ->
-        {build_regex(SwaggerPath),
-         get_filename(Prefix, SwaggerPath)}
-    end, Paths),
-  build_context(Routes, RouteCtx).
 
 -spec dispatch(event(), req(), appctx()) ->
     {ok, req(), appctx()}
@@ -69,48 +51,4 @@ dispatch_rules(Prefix, Yaml, RouteCtx) ->
   | {reply, cow_ws:frame() | [cow_ws:frame()], req(), appctx(), hibernate}
   | {stop, req(), appctx()}.
 dispatch(Event, Req, AppContext) ->
-  Routes = maps:get(routes, AppContext),
-  RouteCtx = maps:get(routectx, AppContext),
-  case match(maps:get(<<"path">>, Event), Routes) of
-    {error, _}=Error -> Error;
-    {ok, {Handler, Params}} ->
-      Method = swagger_routerl_utils:to_atom(maps:get(<<"method">>, Event)),
-      try
-        Handler:Method(Event, Req, Params, RouteCtx)
-      catch
-        error:undef -> {stop, Req, AppContext}
-      end
-  end.
-
--spec get_routectx(appctx()) -> routectx().
-get_routectx(#{routectx := RouteCtx}) -> RouteCtx.
-
-%%% Private functions
-
--spec build_context(routes(), routectx()) -> appctx().
-build_context(Routes, RouteCtx) ->
-  #{
-    % routing table compiles
-    routes => Routes,
-    % this context will be passed to `swagger_routerl_cowboy_ws`
-    routectx => RouteCtx
-  }.
-
--spec match(path(), routes()) ->
-  {ok, {handler(), params()}} | {error, notfound}.
-match(_Path, []) ->
-  {error, notfound};
-match(Path, [{MP, Handler} | Rest]) ->
-  case re:run(Path, MP) of
-    {match, Matches} ->
-      {ok, {Handler, swagger_routerl_utils:extract_params(Path, Matches)}};
-    _Rest -> match(Path, Rest)
-  end.
-
--spec build_regex(list()) -> re:mp().
-build_regex(SwaggerPath) ->
-  swagger_routerl_utils:swaggerpath_build_regex(SwaggerPath).
-
--spec get_filename(list(), list()) -> atom().
-get_filename(Prefix, PathConfig) ->
-  swagger_routerl_utils:swaggerpath2module(Prefix, PathConfig).
+  swagger_routerl_router:dispatch(Event, Req, AppContext).

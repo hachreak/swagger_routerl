@@ -23,65 +23,7 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-swagger_routerl_cowboy_ws_test_() ->
-  {foreach,
-    fun start/0,
-    fun stop/1,
-    [
-     fun build_regex/1,
-     fun get_filename/1,
-     fun compile/1,
-     fun build_context/1,
-     fun get_routectx/1,
-     fun match/1
-    ]
-  }.
-
-start() -> ok.
-
-stop(_) -> ok.
-
-build_regex(_) ->
-  fun() ->
-    MP = swagger_routerl_cowboy_ws:build_regex(
-        "/users/{userid}/email"),
-    Handler = fuu,
-    ?assertEqual({ok, {Handler, ["abc"]}}, swagger_routerl_cowboy_ws:match(
-      <<"/users/abc/email">>, [{MP, Handler}])),
-    ?assertEqual({ok, {Handler, ["abc-def"]}}, swagger_routerl_cowboy_ws:match(
-      <<"/users/abc-def/email">>, [{MP, Handler}])),
-    ?assertEqual(
-      {ok, {Handler, ["abc-123-def"]}},
-      swagger_routerl_cowboy_ws:match(
-        <<"/users/abc-123-def/email">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      <<"/users">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      <<"/users/">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      <<"/users/abc/fuu">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_cowboy_ws:match(
-      <<"/users/abc/email/fuu">>, [{MP, Handler}])),
-
-    % check "-"
-    MP2 = swagger_routerl_cowboy_ws:build_regex(
-        "/my-users/{userid}/email"),
-    Handler2 = bar,
-    ?assertEqual({ok, {Handler2, ["abc"]}}, swagger_routerl_cowboy_ws:match(
-      <<"/my-users/abc/email">>, [{MP2, Handler2}]))
-  end.
-
-get_filename(_) ->
-  fun() ->
-    Path = swagger_routerl_cowboy_ws:get_filename(
-        "/users/{userid}/email"),
-    ?assertEqual(
-      ws_users_userid_email, Path
-    )
-  end.
-
-compile(_) ->
-  fun() ->
+compile_test() ->
     File = [
       {"paths", [
         {"/users/{userid}", ok},
@@ -92,7 +34,8 @@ compile(_) ->
         {"/not-exists/pippo", ok}
       ]}
     ],
-    Appctx = swagger_routerl_cowboy_ws:compile(File, fuubar),
+    [{"/websocket", swagger_routerl_cowboy_v1_ws_dispatcher, Appctx}] =
+        swagger_routerl_cowboy_ws:compile("ws_", File, fuubar, #{}),
     Event1 = #{
       <<"path">> => <<"/users/pippo/email">>,
       <<"method">> => <<"get">>
@@ -114,16 +57,16 @@ compile(_) ->
                        <<"path">> => <<"/users/pippo/email">>,
                        <<"method">> => <<"get">>
                       }, MyEvent),
-                    {return, MyEvent}
+                    {ok, MyEvent}
                 end
                ),
     try
-      ?assertEqual({return, Event1},
-                   swagger_routerl_cowboy_ws:execute(Event1, empty, Appctx)),
+      ?assertEqual({ok, Event1},
+                   swagger_routerl_cowboy_ws:dispatch(Event1, empty, Appctx)),
       ?assertEqual({error, notfound},
-                   swagger_routerl_cowboy_ws:execute(Event2, empty, Appctx)),
+                   swagger_routerl_cowboy_ws:dispatch(Event2, empty, Appctx)),
       ?assertEqual({error, notdefined},
-                   swagger_routerl_cowboy_ws:execute(Event3, empty, Appctx))
+                   swagger_routerl_cowboy_ws:dispatch(Event3, empty, Appctx))
     after
       meck:validate(ws_users_userid_email),
       meck:unload(ws_users_userid_email)
@@ -141,38 +84,13 @@ compile(_) ->
                        <<"path">> => <<"/my-clients/pippo">>,
                        <<"method">> => <<"post">>
                       }, MyEvent),
-                    {return, MyEvent}
+                    {ok, MyEvent}
                 end
                ),
     try
-      ?assertEqual({return, Event4},
-                   swagger_routerl_cowboy_ws:execute(Event4, empty, Appctx))
+      ?assertEqual({ok, Event4},
+                   swagger_routerl_cowboy_ws:dispatch(Event4, empty, Appctx))
     after
       meck:validate('ws_my_clients_clientid'),
       meck:unload('ws_my_clients_clientid')
-    end
-  end.
-
-build_context(_) ->
-  fun() ->
-    ?assertEqual(
-      #{routes => fuu, routectx => bar},
-      swagger_routerl_cowboy_ws:build_context(fuu, bar))
-  end.
-
-get_routectx(_) ->
-  fun() ->
-    ?assertEqual(
-      bar,
-      swagger_routerl_cowboy_ws:get_routectx(
-        swagger_routerl_cowboy_ws:build_context(fuu, bar)))
-  end.
-
-match(_) ->
-  fun() ->
-    Url = <<"/my-clients/pippo">>,
-    {ok, MP} = re:compile("my-clients/([\\w|-]+)"),
-    {ok, {myhandler, Params}} = swagger_routerl_cowboy_ws:match(
-                                  Url, [{MP, myhandler}]),
-    ?assertEqual(["pippo"], Params)
-  end.
+    end.

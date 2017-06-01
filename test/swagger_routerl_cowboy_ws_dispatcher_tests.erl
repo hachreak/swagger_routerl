@@ -23,59 +23,29 @@
 
 -include_lib("eunit/include/eunit.hrl").
 
-swagger_routerl_cowboy_ws_dispatcher_test_() ->
-  {foreach,
-    fun start/0,
-    fun stop/1,
-    [
-     fun init/1,
-     fun ping/1,
-     fun text/1
-    ]
-  }.
-
-start() -> ok.
-
-stop(_) -> ok.
-
-init(_) ->
-  fun() ->
-    AppCtx = swagger_routerl_cowboy_ws:build_context(qwerty, bar),
+ping_test() ->
+    AppCtx = swagger_routerl_router:build_context(qwerty, bar),
     ?assertEqual(
-       {cowboy_websocket, fuu, bar},
-       swagger_routerl_cowboy_ws_dispatcher:init(fuu, AppCtx))
-  end.
-
-ping(_) ->
-  fun() ->
-    AppCtx = swagger_routerl_cowboy_ws:build_context(qwerty, bar),
-    RouteCtx = swagger_routerl_cowboy_ws:get_routectx(AppCtx),
-    ?assertEqual(
-       {ok, fuu, RouteCtx},
+       {ok, fuu, AppCtx},
        swagger_routerl_cowboy_ws_dispatcher:websocket_handle(
-         {ping, hello}, fuu, RouteCtx))
-  end.
+         {ping, hello}, fuu, AppCtx)).
 
-text(_) ->
-  fun() ->
+text_test() ->
     Event = #{<<"test">> => <<"tset">>},
     Json = jsx:encode(Event),
-    AppCtx = swagger_routerl_cowboy_ws:build_context(qwerty, bar),
-    RouteCtx = swagger_routerl_cowboy_ws:get_routectx(AppCtx),
+    AppCtx = swagger_routerl_router:build_context(qwerty, bar),
     meck:new(swagger_routerl_cowboy_ws,
              [no_link, passthrough, no_history, non_strict]),
     meck:expect(swagger_routerl_cowboy_ws, execute, 3,
-                fun(MyEvent, fuu, MyRouteCtx) ->
-                    ?assertEqual(RouteCtx, MyRouteCtx),
+                fun(MyEvent, fuu, MyAppCtx) ->
+                    ?assertEqual(AppCtx, MyAppCtx),
                     ?assertEqual(Event, MyEvent)
                 end
                ),
     try
       swagger_routerl_cowboy_ws_dispatcher:websocket_handle(
-        {text, Json}, fuu, RouteCtx)
+        {text, Json}, fuu, AppCtx)
     after
       meck:validate(swagger_routerl_cowboy_ws),
       meck:unload(swagger_routerl_cowboy_ws)
-    end
-  end.
-
+    end.

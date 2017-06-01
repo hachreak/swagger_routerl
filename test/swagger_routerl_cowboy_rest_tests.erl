@@ -127,12 +127,12 @@ file_endpoint_test() ->
 
   ?assertEqual([{
       "/docs/swagger.yaml",
-      swagger_routerl_cowboy_rest_docs_handler,
+      swagger_routerl_cowboy_v1_file_handler,
       #{swagger_file => Expected_http}
     }], swagger_routerl_cowboy_rest:file_endpoint(Swagger, #{})),
   ?assertEqual([{
       "/docs/swagger.yaml",
-      swagger_routerl_cowboy_rest_docs_handler,
+      swagger_routerl_cowboy_v1_file_handler,
       #{swagger_file => Expected_https}
     }], swagger_routerl_cowboy_rest:file_endpoint(Swagger, #{
       protocol => <<"https">>
@@ -146,7 +146,7 @@ file_endpoint_test() ->
     })),
   ?assertEqual([{
       "/myendpoint/swagger.yaml",
-      swagger_routerl_cowboy_rest_docs_handler,
+      swagger_routerl_cowboy_v1_file_handler,
       #{swagger_file => Expected_http}
     }], swagger_routerl_cowboy_rest:file_endpoint(Swagger, #{
       protocol => <<"http">>, endpoint => "/myendpoint/swagger.yaml"
