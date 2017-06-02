@@ -28,7 +28,7 @@
   routes/2
 ]).
 
--export_type([routectx/0, appctx/0, routes/0, params/0]).
+-export_type([routectx/0, appctx/0, routes/0, event/0]).
 
 -type yaml()          :: swagger_routerl:yaml().
 -type routes()        :: list({re:mp(), handler()}).
@@ -71,7 +71,7 @@ dispatch(Event, Req, AppContext) ->
       try
         Handler:Method(Event, Req, Params, RouteCtx)
       catch
-        error:undef -> {error, notdefined}
+        error:undef -> {stop, Req, AppContext}
       end
   end.
 
