@@ -1,5 +1,5 @@
 %%% @author Leonardo Rossi <leonardo.rossi@studenti.unipr.it>
-%%% @copyright (C) 2016 Leonardo Rossi
+%%% @copyright (C) 2016, 2017 Leonardo Rossi
 %%%
 %%% This software is free software; you can redistribute it and/or
 %%% modify it under the terms of the GNU General Public License as
@@ -26,21 +26,16 @@
   dispatch/3
 ]).
 
--export_type([routectx/0, appctx/0, routes/0, params/0]).
-
--type routes()   :: list({re:mp(), handler()}).
--type handler()  :: atom().
--type routectx() :: term().
--type appctx()   :: #{routectx => routectx(), routes => routes()}.
+-type appctx()   :: swagger_routerl_router:appctx().
 -type req()      :: cowboy_req:req().
--type event()    :: map().
--type params()   :: swagger_routerl_utils:params().
+-type event()    :: swagger_routerl_router:event().
 
 %%% API functions
 
 compile(Prefix, Yaml, RouteCtx, Ctx) ->
   Endpoint = maps:get(endpoint, Ctx, "/websocket"),
-  Handler = maps:get(handler, Ctx, swagger_routerl_cowboy_v1_ws_dispatcher),
+  Handler = maps:get(
+              handler, Ctx, swagger_routerl_cowboy_v1_ws_json_dispatcher),
   AppCtx = swagger_routerl_router:compile(Prefix, Yaml, RouteCtx),
   [{Endpoint, Handler, AppCtx}].
 

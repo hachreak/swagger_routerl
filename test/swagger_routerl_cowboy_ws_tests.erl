@@ -34,7 +34,7 @@ compile_test() ->
         {"/not-exists/pippo", ok}
       ]}
     ],
-    [{"/websocket", swagger_routerl_cowboy_v1_ws_dispatcher, Appctx}] =
+    [{"/websocket", swagger_routerl_cowboy_v1_ws_json_dispatcher, Appctx}] =
         swagger_routerl_cowboy_ws:compile("ws_", File, fuubar, #{}),
     Event1 = #{
       <<"path">> => <<"/users/pippo/email">>,
@@ -65,7 +65,7 @@ compile_test() ->
                    swagger_routerl_cowboy_ws:dispatch(Event1, empty, Appctx)),
       ?assertEqual({error, notfound},
                    swagger_routerl_cowboy_ws:dispatch(Event2, empty, Appctx)),
-      ?assertEqual({error, notdefined},
+      ?assertEqual({error, endpoint_undefined,empty,fuubar},
                    swagger_routerl_cowboy_ws:dispatch(Event3, empty, Appctx))
     after
       meck:validate(ws_users_userid_email),
