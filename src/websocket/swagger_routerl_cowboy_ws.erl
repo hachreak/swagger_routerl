@@ -40,10 +40,8 @@ compile(Prefix, Yaml, RouteCtx, Ctx) ->
   [{Endpoint, Handler, AppCtx}].
 
 -spec dispatch(event(), req(), appctx()) ->
-    {ok, req(), appctx()}
-  | {ok, req(), appctx(), hibernate}
-  | {reply, cow_ws:frame() | [cow_ws:frame()], req(), appctx()}
-  | {reply, cow_ws:frame() | [cow_ws:frame()], req(), appctx(), hibernate}
-  | {stop, req(), appctx()}.
+    {reply, term(), req(), appctx()}
+  | {ok, req(), appctx()}
+  | {error, atom(), req(), appctx()}.
 dispatch(Event, Req, AppContext) ->
   swagger_routerl_router:dispatch(Event, Req, AppContext).

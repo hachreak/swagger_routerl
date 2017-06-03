@@ -51,8 +51,11 @@ websocket_terminate(_Reason, _Req, _State) -> ok.
 
 %% Private functions
 
-output({reply, Msg, Req}, AppCtx) ->
-  {reply, {text, jsx:encode(#{result => ok, context => Msg})}, Req, AppCtx};
-output({shutdown, Req}, AppCtx) ->
-  {shutdown, jsx:encode(#{result => error, context => Req}), AppCtx};
-output({ok, Rest}, AppCtx) -> {ok, Rest, AppCtx}.
+output({reply, Msg, Req, RouteCtx}, AppCtx) ->
+  MsgEncoded = jsx:encode(#{result => ok, context => Msg}),
+  {reply, {text, MsgEncoded}, Req, AppCtx#{routectx => RouteCtx}};
+output({error, Error, Req, RouteCtx}, AppCtx) ->
+  MsgEncoded = jsx:encode(#{result => error, context => Error}),
+  {reply, {text, MsgEncoded}, Req, AppCtx#{routectx => RouteCtx}};
+output({ok, Req, RouteCtx}, AppCtx) ->
+  {ok, Req, AppCtx#{routectx => RouteCtx}}.

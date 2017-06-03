@@ -60,7 +60,9 @@ routes(Paths, Prefix) ->
     end, Paths).
 
 -spec dispatch(event(), any(), appctx()) ->
-    {ok, req(), appctx()} | {stop, req(), routectx()}.
+    {reply, term(), req(), routectx()}
+  | {ok, req(), routectx()}
+  | {error, atom(), req(), routectx()}.
 dispatch(Event, Req, AppContext) ->
   Routes = maps:get(routes, AppContext),
   RouteCtx = maps:get(routectx, AppContext),
@@ -71,7 +73,7 @@ dispatch(Event, Req, AppContext) ->
       try
         Handler:Method(Event, Req, Params, RouteCtx)
       catch
-        error:undef -> {stop, Req, AppContext}
+        error:undef -> {error, endpoint_undefined, Req, RouteCtx}
       end
   end.
 
