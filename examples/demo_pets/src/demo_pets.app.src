@@ -1,0 +1,20 @@
+{application, demo_pets,
+ [{description, "An OTP application"},
+  {vsn, "0.1.0"},
+  {registered, []},
+  {mod, { demo_pets_app, []}},
+  {applications,
+   [
+    cowboy,
+    jsx,
+    kernel,
+    stdlib,
+    swagger_routerl
+   ]},
+  {env,[]},
+  {modules, []},
+
+  {maintainers, []},
+  {licenses, []},
+  {links, []}
+ ]}.
