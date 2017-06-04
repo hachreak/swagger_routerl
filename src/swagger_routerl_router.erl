@@ -67,13 +67,13 @@ dispatch(Event, Req, AppContext) ->
   Routes = maps:get(routes, AppContext),
   RouteCtx = maps:get(routectx, AppContext),
   case match(maps:get(<<"path">>, Event), Routes) of
-    {error, _}=Error -> Error;
+    {error, Error} -> {error, Error, Req, RouteCtx};
     {ok, {Handler, Params}} ->
       Method = swagger_routerl_utils:to_atom(maps:get(<<"method">>, Event)),
       try
         Handler:Method(Event, Req, Params, RouteCtx)
       catch
-        error:undef -> {error, endpoint_undefined, Req, RouteCtx}
+        error:undef -> {error, handler_undefined, Req, RouteCtx}
       end
   end.
 
@@ -94,7 +94,7 @@ build_context(Routes, RouteCtx) ->
 -spec match(path(), routes()) ->
   {ok, {handler(), params()}} | {error, notfound}.
 match(_Path, []) ->
-  {error, notfound};
+  {error, endpoint_undefined};
 match(Path, [{MP, Handler} | Rest]) ->
   case re:run(Path, MP) of
     {match, Matches} ->

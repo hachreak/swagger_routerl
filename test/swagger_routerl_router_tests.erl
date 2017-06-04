@@ -41,13 +41,13 @@ build_regex_test() ->
       {ok, {Handler, ["abc-123-def"]}},
       swagger_routerl_router:match(
         <<"/users/abc-123-def/email">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_router:match(
+    ?assertEqual({error, endpoint_undefined}, swagger_routerl_router:match(
       <<"/users">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_router:match(
+    ?assertEqual({error, endpoint_undefined}, swagger_routerl_router:match(
       <<"/users/">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_router:match(
+    ?assertEqual({error, endpoint_undefined}, swagger_routerl_router:match(
       <<"/users/abc/fuu">>, [{MP, Handler}])),
-    ?assertEqual({error, notfound}, swagger_routerl_router:match(
+    ?assertEqual({error, endpoint_undefined}, swagger_routerl_router:match(
       <<"/users/abc/email/fuu">>, [{MP, Handler}])),
 
     % check "-"

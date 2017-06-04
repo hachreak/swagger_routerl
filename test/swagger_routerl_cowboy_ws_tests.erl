@@ -63,9 +63,9 @@ compile_test() ->
     try
       ?assertEqual({ok, Event1},
                    swagger_routerl_cowboy_ws:dispatch(Event1, empty, Appctx)),
-      ?assertEqual({error, notfound},
+      ?assertEqual({error, endpoint_undefined, empty, fuubar},
                    swagger_routerl_cowboy_ws:dispatch(Event2, empty, Appctx)),
-      ?assertEqual({error, endpoint_undefined,empty,fuubar},
+      ?assertEqual({error, handler_undefined, empty, fuubar},
                    swagger_routerl_cowboy_ws:dispatch(Event3, empty, Appctx))
     after
       meck:validate(ws_users_userid_email),
